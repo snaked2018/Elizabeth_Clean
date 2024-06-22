@@ -1,4 +1,13 @@
-<article class="py-8">
+<article
+  class="py-8"
+  itemscope
+  itemtype="https://schema.org/BlogPosting">
+  <meta itemprop="headline" content="{{ article.title }}">
+  <meta itemprop="author" content="{{ article.author }}">
+  <meta itemprop="datePublished" content="{{ article.published_at | date: format: 'iso8601' }}">
+  <meta itemprop="image" content="{{ article.image | image_url: 'large' }}">
+  <meta itemprop="description" content="{{ article.body }}">
+
   {% for block in section.blocks %}
     {% case block.type %}
       {% when 'article_title' %}
@@ -65,12 +74,11 @@
                 <span class="text-xs text-gray-400">{{ comment.created_at | date: format: 'default' }}</span>
                 <p class="text-sm">{{ comment.content }}</p>
               </div>
-
-              {% if paginate.pages > 1 %}
-                {{ paginate | default_pagination }}
-              {% endif %}
-
             {% endfor %}
+
+            <div class="max-w-6xl mx-auto">
+              {% render 'pagination' %}
+            </div>
           {% endpaginate %}
         </div>
       {% else %}
@@ -125,6 +133,36 @@
     </div>
   {% endif %}
 
+  <script>
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "{{ article.title | json }}",
+      "articleBody": "{{ article.content | strip_html | json }}",
+      {% if article.excerpt != blank %}
+        "description": "{{ article.excerpt | strip_html | json }}",
+      {% endif %}
+      {% if article.image %}
+        "image": [
+          {{ article.image | image_url: 'medium' | prepend: 'https' | json }}
+        ]
+        {% endif %}
+        "datePublished": "{{ article.published_at | date: format: 'default' | json }}",
+        "datecreated": "{{ article.created_at | date: format: 'default' | json }}",
+        "author": {
+          "@type": "Person",
+          "name": "{{ article.author | json }}"  
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "{{ shop.name | json }}",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "{{ shop.logo | img_url: 'medium' | prepend: 'https' | json }}"
+          }
+        }
+    }
+  </script>
 
   {% schema %}
     {
